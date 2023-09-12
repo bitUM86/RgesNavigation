@@ -10,7 +10,6 @@ namespace RgesNaviApi.Controllers
 {
     [ApiController]
     [Route("api")]
-
     public class EnergyObjectController : Controller
     {
         private readonly ILogger<EnergyObjectController> _logger;
@@ -21,16 +20,12 @@ namespace RgesNaviApi.Controllers
             db = context;
         }
 
-        [HttpPost, Authorize]
-        [Route("objects/{FilterDto filter}")]
-        public JsonResult GetObjectsByFiltering(FilterDto filterDto)
+        [HttpPost]
+        [Authorize]
+        [Route("objects")]
+        public IResult GetObjectsByFiltering(FilterDto filterDto)
         {
-            _logger.LogInformation($"Пришел запрос с параметрами:\r\n" +
-                                   $"Имя: {filterDto.Name}\r\n" +
-                                   $"Тип объекта: {String.Join(", ", filterDto.Filter)} \r\n" +
-                                   $"\r\n подразделение: {String.Join(", ", filterDto.District)} ");
-
-            return Json(db.EnergyObjects.Where(eo => filterDto.Name == String.Empty ? true : eo.Name.Contains(filterDto.Name))
+            return Results.Json(db.EnergyObjects.Where(eo => filterDto.Name == String.Empty ? true : eo.Name.Contains(filterDto.Name))
                                          .Where(eo => filterDto.Filter.Count == 0 ? true : filterDto.Filter.Contains(eo.EnergyObjectType))
                                          .Where(eo => filterDto.District.Count == 0 ? true : filterDto.District.Contains(eo.District))
                                          .ToList());
@@ -39,57 +34,52 @@ namespace RgesNaviApi.Controllers
         [HttpPost]
         [Authorize(Roles = "admin,editor")]
         [Route("objects/add")]
-        public string AddObject(EnergyObject energyObject)
+        public IResult AddObject(EnergyObject energyObject)
         {
             var eObject = db.EnergyObjects.Where(eo => eo.IsImhoEqual(energyObject));
-            if (eObject != null) return $"объект {energyObject.EnergyObjectType} - {energyObject.Name} уже существует!";
-            try
+            if (eObject == null)
             {
-                var entity = db.EnergyObjects.Add(energyObject);
+                var entry = db.EnergyObjects.Add(energyObject);
                 db.SaveChanges();
-                return entity.Entity.Name.ToString();
+                return Results.Ok(entry.Entity);
             }
-            catch (Exception ex)
-            {
-                return $"Что то наебнулось.  {ex.Message}";
-            }
+            else return Results.Forbid();
         }
 
         [HttpGet]
         [Authorize(Roles = "admin,editor")]
-        [Route("objects/edit/{id}")]
-        public JsonResult EditObject(int id)
+        [Route("objects/{id}")]
+        public IResult EditObject(int id)
         {
             EnergyObject? energyObject = db.EnergyObjects.FirstOrDefault(eo => eo.Id == id);
-            return energyObject != null ? Json(energyObject) : Json(null);
+            return energyObject != null ? Results.Ok(energyObject) : Results.NotFound();
         }
 
         [HttpPost]
         [Authorize(Roles = "admin,editor")]
         [Route("objects/edit")]
-        public string EditObject(EnergyObject eo)
+        public IResult EditObject(EnergyObject eo)
         {
             EnergyObject energyObject = db.EnergyObjects.Update(eo).Entity;
-            if (energyObject == null) return "Объект не найден";
-
+            if (energyObject == null) return Results.NotFound();
             db.SaveChanges();
-            return $"Изменения объекта {energyObject.EnergyObjectType} - {energyObject.Name} сохранены.";
+            return Results.Ok(energyObject);
         }
 
         [HttpPost]
         [Authorize(Roles = "admin,editor")]
         [Route("objects/delete/{id}")]
-        public string DeleteObject(int id)
+        public IResult DeleteObject(int id)
         {
-            EnergyObject? energyObject = db.EnergyObjects.FirstOrDefault(op => op.Id==id);
+            EnergyObject? energyObject = db.EnergyObjects.FirstOrDefault(op => op.Id == id);
 
             if (energyObject != null)
             {
                 db.EnergyObjects.Remove(energyObject);
                 db.SaveChanges();
-                return $"Объект {energyObject.EnergyObjectType} - {energyObject.Name} удален";
+                return Results.Ok();
             }
-            else return $"Объект с Id = {id} не найден";
+            else return Results.NotFound();
         }
     }
 }

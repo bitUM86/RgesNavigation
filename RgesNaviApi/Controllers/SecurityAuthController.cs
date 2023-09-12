@@ -21,10 +21,10 @@ namespace RgesNaviApi.Controllers
 
         [HttpPost]
         [Route("getjwt")]
-                public IActionResult CreateJwt(LoginDto user)
+                public IResult CreateJwt(LoginDto user)
         {
             User? userFromDb = db.Users.FirstOrDefault(p => p.Login == user.Login &&  p.Password == user.Password);
-            if (userFromDb is null) return Unauthorized();
+            if (userFromDb is null) return Results.Unauthorized();
 
             var claims = new List<Claim> { new Claim(ClaimTypes.Name, userFromDb.Login),
                                             new Claim(ClaimTypes.Role, userFromDb.Role)};
@@ -38,7 +38,7 @@ namespace RgesNaviApi.Controllers
            
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
 
-            return Ok(encodedJwt);
+            return Results.Json(new ResponseDto( userFromDb.Role, userFromDb.Username, encodedJwt ));
         }
     }
 }

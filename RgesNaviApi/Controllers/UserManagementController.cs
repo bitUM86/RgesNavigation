@@ -20,37 +20,42 @@ namespace RgesNaviApi.Controllers
 
         [HttpGet]
         [Route("users")]
-        public JsonResult GetUsers() => Json(db.Users.ToList());
+        public IResult GetUsers() => Results.Ok(db.Users.ToList());
 
         [HttpGet]
         [Route("users/{id}")]
-        public JsonResult GetUser(int id)
+        public IResult GetUser(int id)
         {
             User? user = db.Users.FirstOrDefault(op => op.Id == id);
-            return user != null ? Json(user) : Json(null);
+            return user != null ? Results.Ok(user) : Results.NotFound();
         }
 
         [HttpPost]
         [Route("users/add")]
-        public string AddUser(User user)
+        public IResult AddUser(User user)
         {
-            User? us = db.Users.First(u => u.Login == user.Login);
-            if (us != null) return $"Объект с ником {user.Login} уже существует";
-
-            db.Users.Add(user);
-            db.SaveChanges();
-            return $"{user.Login}  добавлен...";
+            User us = db.Users.First(u => u.Login == user.Login);
+            if (us != null) return Results.Forbid();
+            else
+            {
+                var entry = db.Users.Add(user);
+                db.SaveChanges();
+                return Results.Ok(entry.Entity);
+            }
         }
 
         [HttpPost]
         [Authorize(Roles = "admin")]
         [Route("users/edit")]
-        public string EditObject(User user)
+        public IResult EditObject(User user)
         {
             User us = db.Users.Update(user).Entity;
-            if (us == null) return "Пользователь не найден";
-            db.SaveChanges();
-            return $"Изменения пользователя {us.Login} сохранены.";
+            if (us == null) return Results.NotFound();
+            else
+            {
+                db.SaveChanges();
+                return Results.Ok(us);
+            }
         }
 
         [HttpPost]
