@@ -9,23 +9,21 @@ using RgesNaviApi.Extensions;
 namespace RgesNaviApi.Controllers
 {
     [ApiController]
-    [Route("api")]
+    [Route("api/objects")]
     public class EnergyObjectController : Controller
     {
-        private readonly ILogger<EnergyObjectController> _logger;
-        ApplicationContext db;
-        public EnergyObjectController(ILogger<EnergyObjectController> logger, ApplicationContext context)
+        readonly ApplicationContext _db;
+        public EnergyObjectController( ApplicationContext context)
         {
-            _logger = logger;
-            db = context;
+            _db = context;
         }
 
         [HttpPost]
         [Authorize]
-        [Route("objects")]
+        [Route("")]
         public IResult GetObjectsByFiltering(FilterDto filterDto)
         {
-            return Results.Json(db.EnergyObjects.Where(eo => filterDto.Name == String.Empty ? true : eo.Name.Contains(filterDto.Name))
+            return Results.Json(_db.EnergyObjects.Where(eo => filterDto.Name == string.Empty ? true : eo.Name.Contains(filterDto.Name))
                                          .Where(eo => filterDto.Filter.Count == 0 ? true : filterDto.Filter.Contains(eo.EnergyObjectType))
                                          .Where(eo => filterDto.District.Count == 0 ? true : filterDto.District.Contains(eo.District))
                                          .ToList());
@@ -33,14 +31,14 @@ namespace RgesNaviApi.Controllers
 
         [HttpPost]
         [Authorize(Roles = "admin,editor")]
-        [Route("objects/add")]
+        [Route("add")]
         public IResult AddObject(EnergyObject energyObject)
         {
-            var eObject = db.EnergyObjects.Where(eo => eo.IsImhoEqual(energyObject));
+            var eObject = _db.EnergyObjects.Where(eo => eo.IsImhoEqual(energyObject));
             if (eObject == null)
             {
-                var entry = db.EnergyObjects.Add(energyObject);
-                db.SaveChanges();
+                var entry = _db.EnergyObjects.Add(energyObject);
+                _db.SaveChanges();
                 return Results.Ok(entry.Entity);
             }
             else return Results.Forbid();
@@ -48,35 +46,35 @@ namespace RgesNaviApi.Controllers
 
         [HttpGet]
         [Authorize(Roles = "admin,editor")]
-        [Route("objects/{id}")]
+        [Route("{id}")]
         public IResult EditObject(int id)
         {
-            EnergyObject? energyObject = db.EnergyObjects.FirstOrDefault(eo => eo.Id == id);
+            var energyObject = _db.EnergyObjects.FirstOrDefault(eo => eo.Id == id);
             return energyObject != null ? Results.Ok(energyObject) : Results.NotFound();
         }
 
         [HttpPost]
         [Authorize(Roles = "admin,editor")]
-        [Route("objects/edit")]
+        [Route("edit")]
         public IResult EditObject(EnergyObject eo)
         {
-            EnergyObject energyObject = db.EnergyObjects.Update(eo).Entity;
+            var energyObject = _db.EnergyObjects.Update(eo).Entity;
             if (energyObject == null) return Results.NotFound();
-            db.SaveChanges();
+            _db.SaveChanges();
             return Results.Ok(energyObject);
         }
 
         [HttpPost]
         [Authorize(Roles = "admin,editor")]
-        [Route("objects/delete/{id}")]
+        [Route("delete/{id}")]
         public IResult DeleteObject(int id)
         {
-            EnergyObject? energyObject = db.EnergyObjects.FirstOrDefault(op => op.Id == id);
+            var energyObject = _db.EnergyObjects.FirstOrDefault(op => op.Id == id);
 
             if (energyObject != null)
             {
-                db.EnergyObjects.Remove(energyObject);
-                db.SaveChanges();
+                _db.EnergyObjects.Remove(energyObject);
+                _db.SaveChanges();
                 return Results.Ok();
             }
             else return Results.NotFound();

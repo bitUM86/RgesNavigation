@@ -5,70 +5,68 @@ using RgesNaviApi.DataBaseContext;
 
 namespace RgesNaviApi.Controllers
 {
-    [Route("api")]
+    [Route("api/users")]
     [ApiController]
     [Authorize(Roles = "admin")]
     public class UserManagementController : Controller
     {
-        private readonly ILogger<EnergyObjectController> _logger;
-        ApplicationContext db;
-        public UserManagementController(ILogger<EnergyObjectController> logger, ApplicationContext context)
+        private readonly ApplicationContext _db;
+        public UserManagementController( ApplicationContext context)
         {
-            _logger = logger;
-            db = context;
+            _db = context;
         }
 
         [HttpGet]
-        [Route("users")]
-        public IResult GetUsers() => Results.Ok(db.Users.ToList());
+        [Route("")]
+        public IResult GetUsers() => Results.Ok(_db.Users.ToList());
 
         [HttpGet]
-        [Route("users/{id}")]
+        [Route("{id}")]
         public IResult GetUser(int id)
         {
-            User? user = db.Users.FirstOrDefault(op => op.Id == id);
+           var user = _db.Users.FirstOrDefault(op => op.Id == id);
             return user != null ? Results.Ok(user) : Results.NotFound();
         }
 
         [HttpPost]
-        [Route("users/add")]
+        [Route("add")]
         public IResult AddUser(User user)
         {
-            User us = db.Users.First(u => u.Login == user.Login);
+            var us = _db.Users.First(u => u.Login == user.Login);
             if (us != null) return Results.Forbid();
             else
             {
-                var entry = db.Users.Add(user);
-                db.SaveChanges();
+                var entry = _db.Users.Add(user);
+                _db.SaveChanges();
                 return Results.Ok(entry.Entity);
             }
         }
 
         [HttpPost]
         [Authorize(Roles = "admin")]
-        [Route("users/edit")]
+        [Route("edit")]
         public IResult EditObject(User user)
         {
-            User us = db.Users.Update(user).Entity;
+            var us = _db.Users.Update(user).Entity;
             if (us == null) return Results.NotFound();
             else
             {
-                db.SaveChanges();
+                _db.SaveChanges();
                 return Results.Ok(us);
             }
         }
 
         [HttpPost]
         [Authorize(Roles = "admin")]
-        [Route("users/delete/{id}")]
+        [Route("delete/{id}")]
         public JsonResult DeleteObject(int id)
         {
-            User? us = db.Users.FirstOrDefault(u => u.Id == id);
+            var us = _db.Users.FirstOrDefault(u => u.Id == id);
 
             if (us != null)
             {
-                db.Users.Remove(us);
-                db.SaveChanges();
+                _db.Users.Remove(us);
+                _db.SaveChanges();
                 return Json(us);
             }
             else return Json(null);

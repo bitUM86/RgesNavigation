@@ -23,7 +23,7 @@ namespace RgesNaviApi.Controllers
         [Route("getjwt")]
                 public IResult CreateJwt(LoginDto user)
         {
-            User? userFromDb = db.Users.FirstOrDefault(p => p.Login == user.Login &&  p.Password == user.Password);
+            var userFromDb = db.Users.FirstOrDefault(p => p.Login == user.Login &&  p.Password == user.Password);
             if (userFromDb is null) return Results.Unauthorized();
 
             var claims = new List<Claim> { new Claim(ClaimTypes.Name, userFromDb.Login),
