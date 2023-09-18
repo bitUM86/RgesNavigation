@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NaviLib.MyTypes;
 using RgesNaviApi.DataBaseContext;
 
@@ -11,33 +12,33 @@ namespace RgesNaviApi.Controllers
     public class UserManagementController : Controller
     {
         private readonly ApplicationContext _db;
-        public UserManagementController( ApplicationContext context)
+        public UserManagementController(ApplicationContext context)
         {
             _db = context;
         }
 
         [HttpGet]
         [Route("")]
-        public IResult GetUsers() => Results.Ok(_db.Users.ToList());
+        public async Task<IResult> GetUsers() => Results.Ok(await _db.Users.ToListAsync());
 
         [HttpGet]
         [Route("{id}")]
-        public IResult GetUser(int id)
+        public async Task<IResult> GetUser(int id)
         {
-           var user = _db.Users.FirstOrDefault(op => op.Id == id);
+            var user = await _db.Users.FirstOrDefaultAsync(op => op.Id == id);
             return user != null ? Results.Ok(user) : Results.NotFound();
         }
 
         [HttpPost]
         [Route("add")]
-        public IResult AddUser(User user)
+        public async Task<IResult> AddUser(User user)
         {
-            var us = _db.Users.First(u => u.Login == user.Login);
+            var us = await _db.Users.FirstAsync(u => u.Login == user.Login);
             if (us != null) return Results.Forbid();
             else
             {
                 var entry = _db.Users.Add(user);
-                _db.SaveChanges();
+                await _db.SaveChangesAsync();
                 return Results.Ok(entry.Entity);
             }
         }
@@ -45,13 +46,13 @@ namespace RgesNaviApi.Controllers
         [HttpPost]
         [Authorize(Roles = "admin")]
         [Route("edit")]
-        public IResult EditObject(User user)
+        public async Task<IResult> EditObject(User user)
         {
             var us = _db.Users.Update(user).Entity;
             if (us == null) return Results.NotFound();
             else
             {
-                _db.SaveChanges();
+                await _db.SaveChangesAsync();
                 return Results.Ok(us);
             }
         }
@@ -59,17 +60,17 @@ namespace RgesNaviApi.Controllers
         [HttpPost]
         [Authorize(Roles = "admin")]
         [Route("delete/{id}")]
-        public JsonResult DeleteObject(int id)
+        public async Task<IResult> DeleteObject(int id)
         {
             var us = _db.Users.FirstOrDefault(u => u.Id == id);
 
             if (us != null)
             {
                 _db.Users.Remove(us);
-                _db.SaveChanges();
-                return Json(us);
+                await _db.SaveChangesAsync();
+                return Results.Ok(us);
             }
-            else return Json(null);
+            else return Results.NotFound();
         }
     }
 }

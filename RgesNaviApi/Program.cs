@@ -1,12 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using RgesNaviApi.DataBaseContext;
 using Microsoft.EntityFrameworkCore;
-using static System.Net.WebRequestMethods;
 
 namespace RgesNaviApi
 {
@@ -28,7 +23,7 @@ namespace RgesNaviApi
             {
                 op.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ClockSkew = new System.TimeSpan(0, 0, 30),
+                    ClockSkew = new TimeSpan(0, 0, 30),
 
                     ValidateIssuer = true,
                     ValidIssuer = AuthOptions.ISSUER,
