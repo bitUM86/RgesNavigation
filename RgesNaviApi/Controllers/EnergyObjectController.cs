@@ -6,7 +6,6 @@ using NaviLib.MyTypes;
 using RgesNaviApi.DataBaseContext;
 using RgesNaviApi.Extensions;
 
-
 namespace RgesNaviApi.Controllers
 {
     [ApiController]
@@ -47,7 +46,7 @@ namespace RgesNaviApi.Controllers
 
         [HttpGet]
         [Authorize(Roles = "admin,editor")]
-        [Route("{id}")]
+        [Route("{id:int}")]
         public async Task<IResult> EditObject(int id)
         {
             var energyObject =await _db.EnergyObjects.FirstOrDefaultAsync(eo => eo.Id == id);
@@ -67,7 +66,7 @@ namespace RgesNaviApi.Controllers
 
         [HttpPost]
         [Authorize(Roles = "admin,editor")]
-        [Route("delete/{id}")]
+        [Route("delete/{id:int}")]
         public async Task<IResult> DeleteObject(int id)
         {
             var energyObject =await _db.EnergyObjects.FirstOrDefaultAsync(op => op.Id == id);

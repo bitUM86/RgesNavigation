@@ -11,9 +11,7 @@ namespace RgesNaviApi
         {
             var builder = WebApplication.CreateBuilder(args);
             var connection = builder.Configuration.GetConnectionString("DefaultConnection");
-
             builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(connection));
-
             builder.Services.AddControllers();
             builder.Services.AddAuthentication(opt =>
             {
@@ -33,28 +31,19 @@ namespace RgesNaviApi
                     IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
                     ValidateIssuerSigningKey = true,
                 };
-
             });
-
             builder.Services.AddEndpointsApiExplorer();
-
             builder.Services.AddSwaggerGen();
-
             var app = builder.Build();
-
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
             app.UseHttpsRedirection();
-
             app.UseAuthentication();
             app.UseAuthorization();
-
             app.MapControllers();
-
             app.Run();
         }
     }

@@ -22,7 +22,7 @@ namespace RgesNaviApi.Controllers
         public async Task<IResult> GetUsers() => Results.Ok(await _db.Users.ToListAsync());
 
         [HttpGet]
-        [Route("{id}")]
+        [Route("{id:int}")]
         public async Task<IResult> GetUser(int id)
         {
             var user = await _db.Users.FirstOrDefaultAsync(op => op.Id == id);
@@ -59,7 +59,7 @@ namespace RgesNaviApi.Controllers
 
         [HttpPost]
         [Authorize(Roles = "admin")]
-        [Route("delete/{id}")]
+        [Route("delete/{id:int}")]
         public async Task<IResult> DeleteObject(int id)
         {
             var us = _db.Users.FirstOrDefault(u => u.Id == id);

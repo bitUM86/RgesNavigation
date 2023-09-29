@@ -3,7 +3,7 @@ using System.Text;
 
 namespace RgesNaviApi
 {
-    public class AuthOptions
+    public static class AuthOptions
     {
         public const string ISSUER = "https://localhost:7155"; // издатель токена
         public const string AUDIENCE = "https://localhost:7155"; // потребитель токена
