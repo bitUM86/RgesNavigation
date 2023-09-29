@@ -1,16 +1,12 @@
-﻿using NaviLib.MyTypes;
+﻿namespace NaviLib.DTO;
 
-
-namespace NaviLib.DTO
+public class LoginDto
 {
-    public class LoginDto
+    public string Login { get; set; }
+    public string Password { get; set; }
+    public LoginDto(string login, string password)
     {
-        public string Login { get; set; }
-        public string Password { get; set; }
-        public LoginDto(string login, string password)
-        {
-            Login = login;
-            Password = password;
-        }
+        Login = login;
+        Password = password;
     }
 }

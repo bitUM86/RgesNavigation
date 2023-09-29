@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore.Design;
 using RgesNaviApi.DataBaseContext;
 
+namespace RgesNaviApi;
+
 public class SampleContextFactory : IDesignTimeDbContextFactory<ApplicationContext>
 {
     public ApplicationContext CreateDbContext(string[] args)
