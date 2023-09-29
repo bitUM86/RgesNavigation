@@ -22,7 +22,6 @@ namespace RgesNaviApi
                 op.TokenValidationParameters = new TokenValidationParameters
                 {
                     ClockSkew = new TimeSpan(0, 0, 30),
-
                     ValidateIssuer = true,
                     ValidIssuer = AuthOptions.ISSUER,
                     ValidateAudience = true,
